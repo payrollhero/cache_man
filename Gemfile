@@ -11,9 +11,9 @@ end
 
 group :development, :test do
   gem "rspec"
-  gem "webmock"
 end
 
 group :test do
+  gem "webmock"
   gem "activeresource"
 end
