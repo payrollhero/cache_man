@@ -56,7 +56,7 @@ describe Fetchable do
     context "when the object does not exist in the cache" do
       before :each do
         stub_request(:get, "http://test.example.com/fetchable_resources/1.json") \
-          .with(:headers => {'Accept'=>'application/json', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Ruby'}) \
+          .with(:headers => {'Accept'=>'application/json'}) \
           .to_return(:status => 200, :body => {'id' => 1, 'name' => 'test'}.to_json, :headers => {})
       end
 
@@ -84,7 +84,7 @@ describe Fetchable do
       context "when the cache has expired" do
         before :each do
           stub_request(:get, "http://test.example.com/fetchable_resources/1.json") \
-            .with(:headers => {'Accept'=>'application/json', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Ruby'}) \
+            .with(:headers => {'Accept'=>'application/json'}) \
             .to_return(:status => 200, :body => {'id' => 1, 'name' => 'test'}.to_json, :headers => {})
           @obj = FetchableResource.new(:id => 1, :name => 'test')
           @obj.instance_variable_set("@cache_expires_at",  10.minutes.ago.to_i)
@@ -92,12 +92,11 @@ describe Fetchable do
         end
 
         it "should fetch the object from the cache" do
-          FetchableResource.fetch(1).should eq(@obj)
+          catch(:publish_was_called) { result = FetchableResource.fetch(1).should eq(@obj) }
         end
 
-        it "should send a note to self to fetch the resource" do
-          publisher.should_receive(:publish).with(:subject => "recache_resource", :body => {:resource_type => "FetchableResource", :resource_id => 1})
-          FetchableResource.fetch(1)
+        it "should enqueue a message with the messaging system to fetch the resource asynchronously" do
+          catch(:publish_was_called) { FetchableResource.fetch(1) }.should eq({:subject => "recache_resource", :body => {:resource_type => "FetchableResource", :resource_id => 1}})
         end
       end
     end

@@ -1,9 +1,6 @@
 # This concern adds support for memcache to a model.
 # It depends on the memcache settings defined in your application to generate the client for accessing the memcache server.
 # The concern allows one to cache an object, but for it to work, the object must respond to id and find methods.
-#
-# Try and maintain the principle of Separation Of Concerns
-# Move methods not related to this concern to other concerns, decorators or modules.
 module Cacheable
   extend ActiveSupport::Concern
 
@@ -32,7 +29,6 @@ module Cacheable
     def get_cached(id)
       cache_client.get(cache_key(id))
     end
-
   end
 
   def cache_client

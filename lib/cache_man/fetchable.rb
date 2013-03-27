@@ -4,9 +4,6 @@
 # By convention, the finder module should be app/models/<model_name>/finder.rb
 # The first attempt to fetch a model will be from memcache.
 # If that fails, then it will fallback to fetching from a different data store.
-#
-# Try and maintain the principle of Separation Of Concerns
-# Move methods not related to this concern to other concerns, decorators or modules.
 module Fetchable
   extend ActiveSupport::Concern
 
@@ -23,13 +20,11 @@ module Fetchable
   module ClassMethods
     def fetch(id)
       cached_resource = get_cached(id)
-
       if cached_resource
         cached_resource.recache_later if cached_resource.stale?
       else
         cached_resource = new_cache(id)
       end
-
       cached_resource
     end
   end

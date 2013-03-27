@@ -5,12 +5,22 @@ describe Cacheable do
     include Cacheable
     attr_accessor :id
 
-    def initialize(attrs)
-      id = attrs[:id]
+    def initialize(attrs = {})
+      attrs.each do |(key, val)|
+        self.__send__("#{key.to_s}=".to_sym, val)
+      end
     end
 
     def self.find(id)
       self.new(:id => id)
+    end
+
+    def attributes
+      {:id => id}
+    end
+
+    def ==(other)
+      other.respond_to?(:attributes) && attributes == other.attributes
     end
   end
 
