@@ -17,7 +17,7 @@ describe CacheMan::Fetchable do
           Class.new do
             include CacheMan::Fetchable
           end
-        end.to raise_exception(RuntimeError, "You should define .find for this module to work")
+        end.to raise_exception(CacheMan::FinderNotFound)
       end
     end
 

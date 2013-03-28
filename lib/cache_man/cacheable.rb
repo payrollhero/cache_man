@@ -1,6 +1,11 @@
-# This concern adds support for memcache to a model.
-# It depends on the memcache settings defined in your application to generate the client for accessing the memcache server.
-# The concern allows one to cache an object, but for it to work, the object must respond to id and find methods.
+# This concern adds support for getting and setting cache for a model.
+# It also adds support for a soft expiry of cache besides a hard expiry.
+# The module allows an object to respond to the stale? method which informs other objects whether the cache has soft expired or not.
+# The cache can be updated asynchronously if it has soft expired.
+# For the asynchronously update of the cache, this gem depends on another gem called dispatch_rider.
+# It depends on the cache settings defined in your application config to work properly.
+# The concern only works for ducks that respond to id and find methods.
+# So, ideally any ActiveModel or ActiveResource object should work.
 module CacheMan
   module Cacheable
     extend ActiveSupport::Concern
