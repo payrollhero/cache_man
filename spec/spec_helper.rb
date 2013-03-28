@@ -6,7 +6,6 @@ require "active_resource"
 require "webmock/rspec"
 require "cache_man.rb"
 
-
 module CacheMan
   Struct.new('Publisher') do
     def publish(options)
@@ -15,8 +14,6 @@ module CacheMan
   end
 
   class Application < ::Rails::Application
-    config.cache_store = :dalli_store, 'localhost:11211', {:namespace => "AttendanceApp_#{Rails.env}", :expires_in => 1.day, :compress => true}
-
     def dispatch_publisher
       Struct::Publisher.new
     end

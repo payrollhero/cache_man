@@ -13,7 +13,7 @@ module CacheMan
 
     module ClassMethods
       def cache_client
-        Dalli::Client.new
+        Rails.cache
       end
 
       def cache_key(id)
@@ -28,7 +28,7 @@ module CacheMan
       alias_method :new_cache, :cache
 
       def get_cached(id)
-        cache_client.get(cache_key(id))
+        cache_client.read(cache_key(id))
       end
     end
 
@@ -42,7 +42,7 @@ module CacheMan
 
     def cache
       @cache_expires_at = Cacheable.cache_duration.since.to_i
-      self.cache_client.set(self.cache_key, self)
+      self.cache_client.write(self.cache_key, self)
     end
 
     def stale?

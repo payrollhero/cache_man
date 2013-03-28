@@ -72,7 +72,7 @@ describe CacheMan::Fetchable do
         before :each do
           @obj = FetchableResource.new(:id => 1, :name => 'test')
           @obj.instance_variable_set("@cache_expires_at", 10.minutes.since.to_i)
-          FetchableResource.cache_client.set('fetchable_resource/1', @obj)
+          FetchableResource.cache_client.write('fetchable_resource/1', @obj)
         end
 
         it "should fetch the object from the cache" do
@@ -88,7 +88,7 @@ describe CacheMan::Fetchable do
             .to_return(:status => 200, :body => {'id' => 1, 'name' => 'test'}.to_json, :headers => {})
           @obj = FetchableResource.new(:id => 1, :name => 'test')
           @obj.instance_variable_set("@cache_expires_at",  10.minutes.ago.to_i)
-          FetchableResource.cache_client.set('fetchable_resource/1', @obj)
+          FetchableResource.cache_client.write('fetchable_resource/1', @obj)
         end
 
         it "should fetch the object from the cache" do

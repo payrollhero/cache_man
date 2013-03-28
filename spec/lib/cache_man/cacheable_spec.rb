@@ -36,7 +36,9 @@ describe CacheMan::Cacheable do
 
   describe ".cache_client" do
     it "should return a client to access the cache" do
-      CacheableTestDummy.cache_client.is_a?(Dalli::Client).should be_true
+      client = CacheableTestDummy.cache_client
+      client.should respond_to(:read)
+      client.should respond_to(:write)
     end
   end
 
@@ -49,7 +51,7 @@ describe CacheMan::Cacheable do
   describe ".cache" do
     it "should find the object and cache it" do
       CacheableTestDummy.cache(1)
-      result = CacheableTestDummy.cache_client.get('cacheable_test_dummy/1')
+      result = CacheableTestDummy.cache_client.read('cacheable_test_dummy/1')
       result.should_not be_stale
       result.should eq(subject)
     end
@@ -57,7 +59,9 @@ describe CacheMan::Cacheable do
 
   describe "#cache_client" do
     it "should return a client to access the cache" do
-      subject.cache_client.is_a?(Dalli::Client).should be_true
+      client = subject.cache_client
+      client.should respond_to(:read)
+      client.should respond_to(:write)
     end
   end
 
@@ -70,7 +74,7 @@ describe CacheMan::Cacheable do
   describe "#cache" do
     it "should cache the object with a soft expiry time" do
       subject.cache
-      result = CacheableTestDummy.cache_client.get('cacheable_test_dummy/1')
+      result = CacheableTestDummy.cache_client.read('cacheable_test_dummy/1')
       result.should_not be_stale
       result.should eq(subject)
     end
