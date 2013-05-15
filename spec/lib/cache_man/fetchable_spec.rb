@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe Fetchable do
+describe CacheMan::Fetchable do
   class FetchableResource < ActiveResource::Base
-    include Fetchable
+    include CacheMan::Fetchable
     self.site = 'http://test.example.com'
   end
 
@@ -15,9 +15,9 @@ describe Fetchable do
       it "should raise an error" do
         expect do
           Class.new do
-            include Fetchable
+            include CacheMan::Fetchable
           end
-        end.to raise_exception
+        end.to raise_exception(RuntimeError, "You should define .find for this module to work")
       end
     end
 
@@ -37,7 +37,7 @@ describe Fetchable do
       it "should not raise any exception and use the custom finder" do
         expect do
           class PatheticFetchableDummy
-            include Fetchable
+            include CacheMan::Fetchable
           end
         end.to_not raise_exception
 

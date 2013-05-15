@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe Cacheable do
+describe CacheMan::Cacheable do
   class CacheableTestDummy
-    include Cacheable
+    include CacheMan::Cacheable
     attr_accessor :id
 
     def initialize(attrs = {})
@@ -30,7 +30,7 @@ describe Cacheable do
 
   describe "cache_duration" do
     it "should return the duration for which the cache is valid" do
-      Cacheable.cache_duration.should eq(20.minutes)
+      CacheMan::Cacheable.cache_duration.should eq(20.minutes)
     end
   end
 
