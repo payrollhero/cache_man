@@ -4,4 +4,6 @@ rvm:
 branches:
   only:
     - master
+before_script: "mkdir -p tmp/cache"
 script: "bundle exec rspec"
+after_script: "rm -rf tmp"
