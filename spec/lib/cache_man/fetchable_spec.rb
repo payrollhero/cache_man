@@ -6,10 +6,6 @@ describe CacheMan::Fetchable do
     self.site = 'http://test.example.com'
   end
 
-  let :publisher do
-    Rails.application.dispatch_publisher
-  end
-
   describe ".included" do
     context "when the class including the module does not have a custom finder" do
       it "should raise an error" do
@@ -76,28 +72,48 @@ describe CacheMan::Fetchable do
         end
 
         it "should fetch the object from the cache" do
-          publisher.should_receive(:publish).exactly(0).times
           FetchableResource.fetch(1).should eq(@obj)
         end
       end
 
       context "when the cache has expired" do
         before :each do
-          stub_request(:get, "http://test.example.com/fetchable_resources/1.json") \
-            .with(:headers => {'Accept'=>'application/json'}) \
-            .to_return(:status => 200, :body => {'id' => 1, 'name' => 'test'}.to_json, :headers => {})
-          @obj = FetchableResource.new(:id => 1, :name => 'test')
+          @obj = FetchableResource.new(:id => 1, :name => 'test_old')
           @obj.instance_variable_set("@cache_expires_at",  10.minutes.ago.to_i)
           FetchableResource.cache_client.write('fetchable_resource/1', @obj)
         end
 
-        it "should fetch the object from the cache" do
-          catch(:publish_was_called) { result = FetchableResource.fetch(1).should eq(@obj) }
+        context "when its able to fetch the object" do
+          before do
+            stub_request(:get, "http://test.example.com/fetchable_resources/1.json") \
+              .with(:headers => {'Accept'=>'application/json'}) \
+              .to_return(:status => 200, :body => {'id' => 1, 'name' => 'test_new'}.to_json, :headers => {})
+          end
+
+          let(:expected) do
+            FetchableResource.new(id: 1, name: 'test_new')
+          end
+
+          it "gets the new value" do
+            FetchableResource.fetch(1).should == expected
+          end
         end
 
-        it "should enqueue a message with the messaging system to fetch the resource asynchronously" do
-          catch(:publish_was_called) { FetchableResource.fetch(1) }.should eq({:subject => "recache_resource", :body => {:resource_type => "FetchableResource", :resource_id => 1}})
+        context "when its not able to fetch the object" do
+          before do
+            stub_request(:get, "http://test.example.com/fetchable_resources/1.json") \
+              .with(:headers => {'Accept'=>'application/json'}) \
+              .to_return(:status => 500, :body => "Server Error", :headers => {})
+          end
+          let(:expected) do
+            FetchableResource.new(id: 1, name: 'test_old')
+          end
+
+          it "returns the cached version" do
+            FetchableResource.fetch(1).should == expected
+          end
         end
+
       end
     end
   end

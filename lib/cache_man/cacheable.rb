@@ -53,9 +53,5 @@ module CacheMan
     def stale?
       @cache_expires_at && Time.now > Time.at(@cache_expires_at)
     end
-
-    def recache_later
-      Rails.application.dispatch_publisher.publish(:subject => "recache_resource", :body => {:resource_type => self.class.name, :resource_id => self.id})
-    end
   end
 end

@@ -7,16 +7,8 @@ require "webmock/rspec"
 require "cache_man.rb"
 
 module CacheMan
-  Struct.new('Publisher') do
-    def publish(options)
-      throw :publish_was_called, options
-    end
-  end
-
   class Application < ::Rails::Application
-    def dispatch_publisher
-      Struct::Publisher.new
-    end
+    config.eager_load = false
   end
 end
 
@@ -25,6 +17,10 @@ CacheMan::Application.initialize!
 RSpec.configure do |config|
   config.before do
     Rails.cache.clear
+  end
+
+  config.before(:suite) do
+    FileUtils.mkdir_p(Rails.root + "tmp/cache")
   end
 
   config.mock_with :rspec
