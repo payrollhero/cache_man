@@ -13,7 +13,7 @@ module CacheMan
       include Cacheable
       begin
         extend "#{name}::Finder".constantize
-      rescue NameError => ex
+      rescue NameError
         raise FinderNotFound.new unless respond_to?(:find)
       end
       private_class_method :find
@@ -22,13 +22,24 @@ module CacheMan
     module ClassMethods
       def fetch(id)
         cached_resource = get_cached(id)
-        if cached_resource
-          cached_resource.recache_later if cached_resource.stale?
+        if cached_resource.nil?
+          new_cache(id)
+        elsif cached_resource.stale?
+          recache(id) || cached_resource
         else
-          cached_resource = new_cache(id)
+          cached_resource
         end
-        cached_resource
       end
+
+      def recache(id)
+        begin
+          new_cache(id)
+        rescue
+          # request failed, should probably do something useful with it here
+          # fall back to using cached copy
+        end
+      end
+
     end
   end
 end

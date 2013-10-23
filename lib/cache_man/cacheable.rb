@@ -45,17 +45,18 @@ module CacheMan
       self.class.cache_key(self.id)
     end
 
+    # this is meant to be overriden to change the expiry (at least for now)
+    def cache_hard_expires_in
+      1.day
+    end
+
     def cache
       @cache_expires_at = Cacheable.cache_duration.since.to_i
-      self.cache_client.write(self.cache_key, self)
+      self.cache_client.write(self.cache_key, self, expires_in: cache_hard_expires_in)
     end
 
     def stale?
       @cache_expires_at && Time.now > Time.at(@cache_expires_at)
-    end
-
-    def recache_later
-      Rails.application.dispatch_publisher.publish(:subject => "recache_resource", :body => {:resource_type => self.class.name, :resource_id => self.id})
     end
   end
 end
