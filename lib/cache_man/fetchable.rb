@@ -22,20 +22,24 @@ module CacheMan
     module ClassMethods
       def fetch(id)
         cached_resource = get_cached(id)
-        if cached_resource
-          if cached_resource.stale?
-            begin
-              cached_resource = new_cache(id)
-            rescue
-              # request failed, should probably do something useful with it here
-              # fall back to using cached copy
-            end
-          end
+        if cached_resource.nil?
+          new_cache(id)
+        elsif cached_resource.stale?
+          recache(id) || cached_resource
         else
-          cached_resource = new_cache(id)
+          cached_resource
         end
-        cached_resource
       end
+
+      def recache(id)
+        begin
+          new_cache(id)
+        rescue
+          # request failed, should probably do something useful with it here
+          # fall back to using cached copy
+        end
+      end
+
     end
   end
 end

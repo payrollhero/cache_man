@@ -23,6 +23,10 @@ RSpec.configure do |config|
     FileUtils.mkdir_p(Rails.root + "tmp/cache")
   end
 
+  config.after(:suite) do
+    FileUtils.rm_rf(Rails.root + "tmp/cache")
+  end
+
   config.mock_with :rspec
   config.order = 'random'
   config.color_enabled = true
